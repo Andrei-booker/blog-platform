@@ -1,15 +1,34 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import { Spin, Alert } from 'antd';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+
 import ArticlesList from '../ArticlesList/ArticleList';
 import Header from '../Header';
 import classes from './App.module.scss';
 import FullArticle from '../FullArticle/FullArticle';
+import SignUp from '../SignUp';
+import SignIn from '../SignIn/SignIn';
+
+import { getCurrentUser } from '../../redux/actions';
+import EditProfile from '../EditProfile/EditProfile';
+import NewArticle from '../NewArticle/NewArticle';
 
 function App() {
+	const dispatch = useDispatch();
 	const loading = useSelector(state => state.appReducer.isFetching);
 	const error = useSelector(state => state.appReducer.isError);
-	// const selectedArticle = useSelector(state => state.selectedArticle.item);
+	const errorMessage = useSelector(state => state.appReducer.errorMessage);
+	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
+	const token = localStorage.getItem('token');
+
+	useEffect(() => {
+		if (!isLoggedIn && token !== 'undefined') {
+			dispatch(getCurrentUser());
+			console.log('Login');
+		}
+	}, []);
+
 	return (
 		<Router>
 			<div className={classes.app}>
@@ -21,13 +40,14 @@ function App() {
 				)}
 				{error && (
 					<div className={classes.error}>
-						<Alert
-							message='Something went wrong... We are already working on this!'
-							type='error'
-						/>
+						<Alert message={errorMessage} type='error' />
 					</div>
 				)}
+				<NewArticle />
 				<Switch>
+					<Route path='/sign-in' component={SignIn} />
+					<Route path='/sign-up' component={SignUp} />
+					{isLoggedIn && <Route path='/profile' component={EditProfile} />}
 					<Route path='/articles/:slug' component={FullArticle} />
 					<Route path='/articles' component={ArticlesList} />
 					<Route path='/' component={ArticlesList} />

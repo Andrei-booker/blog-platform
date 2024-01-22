@@ -7,16 +7,32 @@ import {
 	LOADER_DISPLAY_ON,
 	ERROR_DISPLAY_ON,
 	ERROR_DISPLAY_OFF,
+	POST_NEW_USER_SUCCESS,
+	POST_NEW_USER_FAILURE,
+	POST_LOG_IN_SUCCESS,
+	POST_LOG_IN_FAILURE,
+	GET_CURRENT_USER_SUCCESS,
+	GET_CURRENT_USER_FAILURE,
+	PUT_EDIT_PROFILE_SUCCESS,
+	PUT_EDIT_PROFILE_FAILURE,
+	LOG_OUT,
 } from './types';
 
-function appReducer(state = { isFetching: false, isError: false }, action) {
+function appReducer(
+	state = {
+		isFetching: false,
+		isError: false,
+		errorMessage: '',
+	},
+	action
+) {
 	switch (action.type) {
 		case LOADER_DISPLAY_OFF:
 			return { ...state, isFetching: false };
 		case LOADER_DISPLAY_ON:
 			return { ...state, isFetching: true };
 		case ERROR_DISPLAY_ON:
-			return { ...state, isError: true };
+			return { ...state, isError: true, errorMessage: action.message };
 		case ERROR_DISPLAY_OFF:
 			return { ...state, isError: false };
 		default:
@@ -85,6 +101,74 @@ function selectedArticle(
 	}
 }
 
-const rootReducer = combineReducers({ articles, selectedArticle, appReducer });
+function userReducer(
+	state = {
+		isLoggedIn: false,
+		user: {
+			email: '',
+			token: '',
+			username: '',
+			bio: '',
+			image: null,
+		},
+		errors: { username: '', email: '' },
+	},
+	action
+) {
+	switch (action.type) {
+		case POST_NEW_USER_SUCCESS:
+			return {
+				...state,
+				user: action.user,
+				isLoggedIn: true,
+				errors: { username: '', email: '' },
+			};
+		case POST_NEW_USER_FAILURE:
+			return { ...state, errors: action.errors };
+		case POST_LOG_IN_SUCCESS:
+			return {
+				...state,
+				user: action.user,
+				isLoggedIn: true,
+				errors: { username: '', email: '' },
+			};
+		case POST_LOG_IN_FAILURE:
+			return { ...state, errors: action.errors };
+		case GET_CURRENT_USER_SUCCESS:
+			return {
+				...state,
+				user: action.user,
+				isLoggedIn: true,
+				errors: { username: '', email: '' },
+			};
+		case GET_CURRENT_USER_FAILURE:
+			return { ...state, errors: action.errors };
+		case PUT_EDIT_PROFILE_SUCCESS:
+			return { ...state, user: action.user };
+		case PUT_EDIT_PROFILE_FAILURE:
+			return { ...state, errors: action.errors };
+		case LOG_OUT:
+			return {
+				isLoggedIn: false,
+				user: {
+					email: '',
+					token: '',
+					username: '',
+					bio: '',
+					image: null,
+				},
+				errors: { username: '', email: '' },
+			};
+		default:
+			return state;
+	}
+}
+
+const rootReducer = combineReducers({
+	articles,
+	selectedArticle,
+	appReducer,
+	userReducer,
+});
 
 export default rootReducer;

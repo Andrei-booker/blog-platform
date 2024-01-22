@@ -5,6 +5,15 @@ import {
 	LOADER_DISPLAY_ON,
 	ERROR_DISPLAY_ON,
 	ERROR_DISPLAY_OFF,
+	POST_NEW_USER_SUCCESS,
+	POST_NEW_USER_FAILURE,
+	POST_LOG_IN_SUCCESS,
+	POST_LOG_IN_FAILURE,
+	GET_CURRENT_USER_SUCCESS,
+	GET_CURRENT_USER_FAILURE,
+	PUT_EDIT_PROFILE_SUCCESS,
+	PUT_EDIT_PROFILE_FAILURE,
+	LOG_OUT,
 } from './types';
 
 export function loaderOff() {
@@ -15,8 +24,8 @@ export function loaderOn() {
 	return { type: LOADER_DISPLAY_ON };
 }
 
-export function errorOn() {
-	return { type: ERROR_DISPLAY_ON };
+export function errorOn(message) {
+	return { type: ERROR_DISPLAY_ON, message };
 }
 
 export function errorOff() {
@@ -36,8 +45,14 @@ export function fetchArticlesList(offset = 0, page = 1) {
 	return async dispatch => {
 		dispatch(loaderOn());
 		try {
+			const token = localStorage.getItem('token');
 			const response = await fetch(
-				`https://blog.kata.academy/api/articles?limit=5&offset=${offset}`
+				`https://blog.kata.academy/api/articles?limit=5&offset=${offset}`,
+				{
+					headers: {
+						Authorization: `Token ${token}`,
+					},
+				}
 			);
 			const { articles, articlesCount } = await response.json();
 			dispatch(fetchArticlesSuccess(articles, articlesCount, page));
@@ -45,7 +60,7 @@ export function fetchArticlesList(offset = 0, page = 1) {
 			dispatch(errorOff());
 		} catch (err) {
 			dispatch(loaderOff());
-			dispatch(errorOn());
+			dispatch(errorOn('API Error'));
 		}
 	};
 }
@@ -72,5 +87,204 @@ export function fetchArticle(slug) {
 			dispatch(loaderOff());
 			dispatch(errorOn());
 		}
+	};
+}
+
+export function postNewUserSuccess(user) {
+	return {
+		type: POST_NEW_USER_SUCCESS,
+		user,
+	};
+}
+
+export function postNewUserFailure(errors) {
+	return {
+		type: POST_NEW_USER_FAILURE,
+		errors,
+	};
+}
+
+export function postNewUser(userData) {
+	const { username, email, password } = userData;
+	return async dispatch => {
+		dispatch(errorOff());
+		dispatch(loaderOn());
+		try {
+			const response = await fetch('https://blog.kata.academy/api/users', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					user: { username, email, password },
+				}),
+			});
+			if (response.status === 422) {
+				localStorage.clear();
+				const { errors } = await response.json();
+				dispatch(postNewUserFailure(errors));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			} else {
+				console.log('New user');
+				const { user } = await response.json();
+				const { token } = user;
+				localStorage.setItem('token', token);
+				dispatch(postNewUserSuccess(user));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			}
+		} catch (err) {
+			dispatch(loaderOff());
+			dispatch(errorOn('Post New User Error'));
+		}
+	};
+}
+
+export function postLogInSuccess(user) {
+	return {
+		type: POST_LOG_IN_SUCCESS,
+		user,
+	};
+}
+
+export function postLogInFailure(errors) {
+	return {
+		type: POST_LOG_IN_FAILURE,
+		errors,
+	};
+}
+
+export function postLogIn(userData) {
+	return async dispatch => {
+		dispatch(errorOff());
+		dispatch(loaderOn());
+		try {
+			const response = await fetch(
+				'https://blog.kata.academy/api/users/login',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: userData,
+				}
+			);
+			if (response.status === 422) {
+				const { errors } = await response.json();
+				dispatch(postNewUserFailure(errors));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			} else {
+				console.log('Action Login');
+				const { user } = await response.json();
+				const { token } = user;
+				localStorage.setItem('token', token);
+				dispatch(postLogInSuccess(user));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			}
+		} catch (err) {
+			dispatch(loaderOff());
+			dispatch(errorOn('Post Log In Error'));
+		}
+	};
+}
+
+export function getCurrentUserSuccess(user) {
+	return {
+		type: GET_CURRENT_USER_SUCCESS,
+		user,
+	};
+}
+
+export function getCurrentUserFailure(errors) {
+	return {
+		type: GET_CURRENT_USER_FAILURE,
+		errors,
+	};
+}
+
+export function getCurrentUser() {
+	return async dispatch => {
+		dispatch(errorOff());
+		dispatch(loaderOn());
+		try {
+			const token = localStorage.getItem('token');
+			const response = await fetch('https://blog.kata.academy/api/user', {
+				headers: { Authorization: `Token ${token}` },
+			});
+			if (response.status === 422) {
+				const { errors } = await response.json();
+				dispatch(getCurrentUserFailure(errors));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			} else {
+				console.log('Current');
+				const { user } = await response.json();
+				dispatch(getCurrentUserSuccess(user));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			}
+		} catch (err) {
+			dispatch(loaderOff());
+			dispatch(errorOn('Get Current User Error'));
+		}
+	};
+}
+
+export function putEditProfileSuccess(user) {
+	return {
+		type: PUT_EDIT_PROFILE_SUCCESS,
+		user,
+	};
+}
+
+export function putEditProfileFailure(errors) {
+	return {
+		type: PUT_EDIT_PROFILE_FAILURE,
+		errors,
+	};
+}
+
+export function putEditProfile(userData) {
+	return async dispatch => {
+		dispatch(errorOff());
+		dispatch(loaderOn());
+		try {
+			const localToken = localStorage.getItem('token');
+			const response = await fetch('https://blog.kata.academy/api/user', {
+				method: 'PUT',
+				headers: {
+					Authorization: `Token ${localToken}`,
+					'Content-Type': 'application/json',
+				},
+				body: userData,
+			});
+			if (response.status === 422) {
+				const { errors } = await response.json();
+				dispatch(putEditProfileFailure(errors));
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			} else {
+				const { user } = await response.json();
+				dispatch(putEditProfileSuccess(user));
+				const { token } = user;
+				if (token !== localToken) {
+					localStorage.setItem('token', token);
+				}
+				dispatch(loaderOff());
+				dispatch(errorOff());
+			}
+		} catch (err) {
+			dispatch(loaderOff());
+			dispatch(errorOn('Put Edit Profile Error'));
+		}
+	};
+}
+
+export function logOut() {
+	return {
+		type: LOG_OUT,
 	};
 }
