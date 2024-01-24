@@ -58,7 +58,7 @@ function EditArticle() {
 
 	useEffect(() => {
 		if (edited) {
-			history.push(`/articles/${slug}`);
+			history.push('/articles');
 		}
 	}, [edited]);
 
