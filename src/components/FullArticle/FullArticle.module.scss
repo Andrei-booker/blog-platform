@@ -38,6 +38,13 @@
 	top: 5px;
 }
 
+.likeButton {
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+}
+
 .likesCount {
 	font-size: 12px;
 	position: relative;
@@ -74,9 +81,14 @@
 	color: rgba(0, 0, 0, 0.5);
 }
 
+.rightBlock {
+	text-align: right;
+}
+
 .userInfo {
 	display: flex;
 	align-items: flex-start;
+	margin-bottom: 30px;
 }
 
 .userTextInfo {
@@ -102,6 +114,32 @@
 
 .userImage {
 	max-width: 46px;
+}
+
+.button {
+	background-color: rgba(28, 28, 28, 0);
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 14px;
+}
+
+.editButton {
+	width: 65px;
+	text-decoration: none;
+	color: #52c41a;
+	border: solid 1px #52c41a;
+	border-radius: 5px;
+	padding: 6px 19px;
+}
+
+.deleteButton {
+	width: 78px;
+	text-decoration: none;
+	color: #f5222d;
+	border: solid 1px #f5222d;
+	border-radius: 5px;
+	padding: 6px 18px;
+	margin-right: 12px;
 }
 
 .articleBody {

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import classes from './Header.module.scss';
 import userLogo from '../../img/user-logo.svg';
 
-import { logOut } from '../../redux/actions';
+import { fetchArticlesList, logOut } from '../../redux/actions';
 
 function Header() {
 	const dispatch = useDispatch();
@@ -30,6 +30,12 @@ function Header() {
 				Realworld Blog
 			</Link>
 			<div className={classes.rightBlock}>
+				<Link
+					to='/new-article'
+					className={[classes.buttonCreateArticle, classes.button].join(' ')}
+				>
+					Create article
+				</Link>
 				{!isLoggedIn && (
 					<Link
 						to='/sign-in'
@@ -44,14 +50,6 @@ function Header() {
 						className={[classes.buttonSignUp, classes.button].join(' ')}
 					>
 						Sign Up
-					</Link>
-				)}
-				{isLoggedIn && (
-					<Link
-						to='/'
-						className={[classes.buttonCreateArticle, classes.button].join(' ')}
-					>
-						Create article
 					</Link>
 				)}
 				{isLoggedIn && (
@@ -78,6 +76,7 @@ function Header() {
 						onClick={() => {
 							localStorage.clear();
 							dispatch(logOut());
+							dispatch(fetchArticlesList());
 						}}
 					>
 						Log Out

@@ -1,15 +1,25 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom/cjs/react-router-dom';
-// import { useDispatch } from 'react-redux';
-import uniqid from 'uniqid';
+import { useDispatch, useSelector } from 'react-redux';
 import { format } from 'date-fns';
+import { message } from 'antd';
+
+import uniqid from 'uniqid';
+
+import {
+	postFavoriteArticle,
+	deleteFavoriteArticle,
+} from '../../redux/actions';
+
 import classes from './MiniArticle.module.scss';
 import heart from '../../img/Vector.svg';
+import redHeart from '../../img/red-heart.svg';
 import userLogo from '../../img/user-logo.svg';
-// import { fetchArticle } from '../../redux/actions';
 
 function MiniArticle({ data }) {
-	// const dispatch = useDispatch();
+	const page = useSelector(state => state.articles.page);
+	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
+	const dispatch = useDispatch();
 	const {
 		slug,
 		title,
@@ -18,21 +28,37 @@ function MiniArticle({ data }) {
 		description,
 		author,
 		createdAt,
+		favorited,
 	} = data;
 	const { image, username } = author;
+
+	const handleFavorite = () => {
+		if (!isLoggedIn) {
+			message.info('You need to sign in to perform this action');
+		}
+		if (favorited) {
+			dispatch(deleteFavoriteArticle(slug, page));
+		} else dispatch(postFavoriteArticle(slug, page));
+	};
 
 	return (
 		<div className={classes.miniArticle}>
 			<div className={classes.articleInfo}>
 				<div className={classes.articleHeader}>
-					<Link
-						to={`/articles/${slug}`}
-						className={classes.articleTitle}
-						// onClick={() => dispatch(fetchArticle(slug))}
-					>
+					<Link to={`/articles/${slug}`} className={classes.articleTitle}>
 						{title}
 					</Link>
-					<img alt='like' src={heart} className={classes.articleLike} />
+					<button
+						type='button'
+						className={classes.likeButton}
+						onClick={handleFavorite}
+					>
+						<img
+							alt='like'
+							src={favorited ? redHeart : heart}
+							className={classes.articleLike}
+						/>
+					</button>
 					<span className={classes.likesCount}>{favoritesCount}</span>
 				</div>
 				<ul className={classes.tagList}>
@@ -78,6 +104,7 @@ MiniArticle.propTypes = {
 		slug: PropTypes.string.isRequired,
 		title: PropTypes.string.isRequired,
 		description: PropTypes.string.isRequired,
+		favorited: PropTypes.bool.isRequired,
 		favoritesCount: PropTypes.number,
 		tagList: PropTypes.arrayOf(PropTypes.string),
 		author: PropTypes.shape({

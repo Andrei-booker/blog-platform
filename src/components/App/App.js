@@ -13,6 +13,7 @@ import SignIn from '../SignIn/SignIn';
 import { getCurrentUser } from '../../redux/actions';
 import EditProfile from '../EditProfile/EditProfile';
 import NewArticle from '../NewArticle/NewArticle';
+import EditArticle from '../EditArticle/EditArticle';
 
 function App() {
 	const dispatch = useDispatch();
@@ -23,9 +24,8 @@ function App() {
 	const token = localStorage.getItem('token');
 
 	useEffect(() => {
-		if (!isLoggedIn && token !== 'undefined') {
+		if (!isLoggedIn && token) {
 			dispatch(getCurrentUser());
-			console.log('Login');
 		}
 	}, []);
 
@@ -43,11 +43,14 @@ function App() {
 						<Alert message={errorMessage} type='error' />
 					</div>
 				)}
-				<NewArticle />
 				<Switch>
 					<Route path='/sign-in' component={SignIn} />
 					<Route path='/sign-up' component={SignUp} />
 					{isLoggedIn && <Route path='/profile' component={EditProfile} />}
+					<Route path='/new-article' component={NewArticle} />
+					{!loading && (
+						<Route path='/articles/:slug/edit' component={EditArticle} />
+					)}
 					<Route path='/articles/:slug' component={FullArticle} />
 					<Route path='/articles' component={ArticlesList} />
 					<Route path='/' component={ArticlesList} />

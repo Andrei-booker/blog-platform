@@ -1,18 +1,20 @@
-import { useDispatch, useSelector } from 'react-redux';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { useState } from 'react';
-import { Redirect } from 'react-router-dom/cjs/react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom';
 import { message } from 'antd';
 
 import classNames from 'classnames';
 
-import { postNewArticle } from '../../redux/actions';
+import classes from './EditArticle.module.scss';
+import { putUpdateArticle } from '../../redux/actions';
 
-import classes from './NewArticle.module.scss';
-
-function NewArticle() {
-	const [inputValue, setInputValue] = useState('');
-	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
+function EditArticle() {
+	const edited = useSelector(state => state.selectedArticle.edited);
+	const selectedArticle = useSelector(state => state.selectedArticle.item);
+	const { title, description, body, tagList, slug } = selectedArticle;
+	const defaultTagList = tagList.map(item => ({ tag: item }));
+	const history = useHistory();
 	const dispatch = useDispatch();
 	const {
 		register,
@@ -20,36 +22,49 @@ function NewArticle() {
 		control,
 		handleSubmit,
 		reset,
-	} = useForm({ mode: 'onSubmit', defaultValues: { tags: [{ tag: '' }] } });
+	} = useForm({
+		mode: 'onSubmit',
+		defaultValues: {
+			title,
+			description,
+			body,
+			tags: defaultTagList.length ? defaultTagList : [{ tag: '' }],
+		},
+	});
 
 	const { fields, append, remove } = useFieldArray({
 		name: 'tags',
 		control,
 	});
 
+	const [inputValue, setInputValue] = useState(tagList.length >= 1 || '');
+
 	const onSubmit = data => {
-		message.success(
-			'The article has been successfully created! Maybe another one?'
-		);
-		const { tags, description, body, title } = data;
+		message.success('The article has been successfully edited.');
+		const { tags } = data;
 		const correctTags = [];
 		tags.forEach(item => {
 			if (item.tag) {
 				correctTags.push(item.tag);
 			}
 		});
-		const formatData = { title, description, body, tagList: correctTags };
-		dispatch(postNewArticle(formatData));
+		const formatData = {
+			...data,
+			tagList: correctTags,
+		};
+		dispatch(putUpdateArticle(formatData, slug));
 		reset();
 	};
 
-	if (!isLoggedIn) {
-		return <Redirect to='/sign-in' />;
-	}
+	useEffect(() => {
+		if (edited) {
+			history.push(`/articles/${slug}`);
+		}
+	}, [edited]);
 
 	return (
 		<div className={classes.signUp}>
-			<p className={classes.title}>Create new article</p>
+			<p className={classes.title}>Edit article</p>
 			<form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
 				<label htmlFor='title' className={classes.inputTitle}>
 					Title
@@ -134,8 +149,8 @@ function NewArticle() {
 							/>
 							<button
 								onClick={() => {
-									setInputValue(fields.length);
 									remove(index);
+									setInputValue(tagList.length);
 								}}
 								className={classes.deleteTagBtn}
 								type='button'
@@ -170,4 +185,4 @@ function NewArticle() {
 	);
 }
 
-export default NewArticle;
+export default EditArticle;
