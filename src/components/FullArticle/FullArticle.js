@@ -62,6 +62,7 @@ function FullArticle() {
 	const handleFavorite = () => {
 		if (!isLoggedIn) {
 			message.info('You need to sign in to perform this action');
+			return;
 		}
 		if (favorited) {
 			dispatch(deleteFavoriteArticle(slug));
