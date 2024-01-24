@@ -33,7 +33,7 @@ function FullArticle() {
 	const dispatch = useDispatch();
 
 	const onDelete = () => {
-		message.success('Article deleted successfully');
+		message.success('The Article was successfully deleted');
 		dispatch(deleteArticle(slug));
 	};
 
