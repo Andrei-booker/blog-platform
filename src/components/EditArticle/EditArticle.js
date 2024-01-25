@@ -64,9 +64,11 @@ function EditArticle() {
 		}
 	}, [edited]);
 
-	if (currentUsername !== username) {
-		dispatch(errorOn('We cannot show you this page'));
-	}
+	useEffect(() => {
+		if (currentUsername !== username) {
+			dispatch(errorOn('We cannot show you this page'));
+		}
+	}, [username, currentUsername]);
 
 	return (
 		username === currentUsername && (
