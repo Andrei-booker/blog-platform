@@ -21,6 +21,7 @@ function App() {
 	const error = useSelector(state => state.appReducer.isError);
 	const errorMessage = useSelector(state => state.appReducer.errorMessage);
 	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
+	const article = useSelector(state => state.selectedArticle.item.slug);
 	const token = localStorage.getItem('token');
 
 	useEffect(() => {
@@ -48,7 +49,7 @@ function App() {
 					<Route path='/sign-up' component={SignUp} />
 					{isLoggedIn && <Route path='/profile' component={EditProfile} />}
 					<Route path='/new-article' component={NewArticle} />
-					{!loading && (
+					{!loading && article && (
 						<Route path='/articles/:slug/edit' component={EditArticle} />
 					)}
 					<Route path='/articles/:slug' component={FullArticle} />

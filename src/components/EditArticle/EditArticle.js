@@ -65,8 +65,8 @@ function EditArticle() {
 	}, [edited]);
 
 	useEffect(() => {
-		if (currentUsername !== username) {
-			dispatch(errorOn('We cannot show you this page'));
+		if (currentUsername && currentUsername !== username) {
+			dispatch(errorOn("You cannot edit someone else' article"));
 		}
 	}, [username, currentUsername]);
 
@@ -171,6 +171,7 @@ function EditArticle() {
 									<button
 										onClick={() => {
 											append();
+
 											setInputValue('');
 										}}
 										className={classes.addTagBtn}
