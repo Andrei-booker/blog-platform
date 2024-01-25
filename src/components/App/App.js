@@ -10,7 +10,7 @@ import FullArticle from '../FullArticle/FullArticle';
 import SignUp from '../SignUp';
 import SignIn from '../SignIn/SignIn';
 
-import { getCurrentUser } from '../../redux/actions';
+import { errorOn, getCurrentUser } from '../../redux/actions';
 import EditProfile from '../EditProfile/EditProfile';
 import NewArticle from '../NewArticle/NewArticle';
 import EditArticle from '../EditArticle/EditArticle';
@@ -53,7 +53,12 @@ function App() {
 					)}
 					<Route path='/articles/:slug' component={FullArticle} />
 					<Route path='/articles' component={ArticlesList} />
-					<Route path='/' component={ArticlesList} />
+					<Route exact path='/' component={ArticlesList} />
+					<Route
+						render={() => {
+							dispatch(errorOn('Page not found'));
+						}}
+					/>
 				</Switch>
 			</div>
 		</Router>
