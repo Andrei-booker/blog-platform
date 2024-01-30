@@ -382,7 +382,6 @@ export function putUpdateArticle(data, slug) {
 				dispatch(errorOff());
 			} else {
 				dispatch(putUpdateArticleSuccess());
-				dispatch(fetchArticle(slug));
 				dispatch(loaderOff());
 				dispatch(errorOff());
 			}

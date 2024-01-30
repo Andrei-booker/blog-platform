@@ -12,8 +12,7 @@ import SignIn from '../SignIn/SignIn';
 
 import { getCurrentUser } from '../../redux/actions';
 import EditProfile from '../EditProfile/EditProfile';
-import NewArticle from '../NewArticle/NewArticle';
-import EditArticle from '../EditArticle/EditArticle';
+import ArticleForm from '../ArticleForm/ArticleForm';
 
 function App() {
 	const dispatch = useDispatch();
@@ -48,9 +47,9 @@ function App() {
 					<Route path='/sign-in' component={SignIn} />
 					<Route path='/sign-up' component={SignUp} />
 					{isLoggedIn && <Route path='/profile' component={EditProfile} />}
-					<Route path='/new-article' component={NewArticle} />
+					<Route path='/new-article' component={ArticleForm} />
 					{!loading && article && (
-						<Route path='/articles/:slug/edit' component={EditArticle} />
+						<Route path='/articles/:slug/edit' component={ArticleForm} />
 					)}
 					<Route path='/articles/:slug' component={FullArticle} />
 					<Route path='/articles' component={ArticlesList} />

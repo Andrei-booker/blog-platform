@@ -20,6 +20,7 @@ function SignUp() {
 	const originalPassword = watch('password');
 	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
 	const error = useSelector(state => state.userReducer.errors);
+	const isFetching = useSelector(state => state.appReducer.isFetching);
 
 	const onSubmit = data => {
 		const { email, username, password } = data;
@@ -156,7 +157,11 @@ function SignUp() {
 						<p className={classes.agreementError}>{errors.checkbox.message}</p>
 					)}
 				</div>
-				<button className={classes.submitButton} type='submit'>
+				<button
+					className={classes.submitButton}
+					type='submit'
+					disabled={isFetching}
+				>
 					Create
 				</button>
 			</form>

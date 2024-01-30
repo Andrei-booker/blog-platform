@@ -19,6 +19,7 @@ function SignIn() {
 
 	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
 	const error = useSelector(state => state.userReducer.errors);
+	const isFetching = useSelector(state => state.appReducer.isFetching);
 
 	const onSubmit = data => {
 		const { email, password } = data;
@@ -82,7 +83,11 @@ function SignIn() {
 						<p className={classes.errorEnd}>{errors.password.message}</p>
 					)}
 				</div>
-				<button className={classes.submitButton} type='submit'>
+				<button
+					className={classes.submitButton}
+					type='submit'
+					disabled={isFetching}
+				>
 					Login
 				</button>
 			</form>

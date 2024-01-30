@@ -1,55 +1,107 @@
-import { useDispatch, useSelector } from 'react-redux';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { useState } from 'react';
-import { Redirect } from 'react-router-dom/cjs/react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom';
 import { message } from 'antd';
 
 import classNames from 'classnames';
 
-import { postNewArticle } from '../../redux/actions';
+import classes from './ArticleForm.module.scss';
+import { errorOn, postNewArticle, putUpdateArticle } from '../../redux/actions';
 
-import classes from './NewArticle.module.scss';
-
-function NewArticle() {
-	const [inputValue, setInputValue] = useState('');
+function ArticleForm() {
+	const history = useHistory();
+	const path = history.location.pathname;
+	const isFetching = useSelector(state => state.appReducer.isFetching);
+	const selectedArticle = useSelector(state => state.selectedArticle.item);
+	const currentUsername = useSelector(state => state.userReducer.user.username);
 	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
+	const { title, description, body, tagList, slug, author } = selectedArticle;
+	const { username } = author;
+	const defaultTagList = tagList.map(item => ({ tag: item }));
 	const dispatch = useDispatch();
+
 	const {
 		register,
 		formState: { errors },
 		control,
 		handleSubmit,
+		setValue,
 		reset,
-	} = useForm({ mode: 'onSubmit', defaultValues: { tags: [{ tag: '' }] } });
+	} = useForm({
+		mode: 'onSubmit',
+		defaultValues: {
+			title: '',
+			description: '',
+			body: '',
+			tags: [{ tag: '' }],
+		},
+	});
 
 	const { fields, append, remove } = useFieldArray({
 		name: 'tags',
 		control,
 	});
 
+	const [inputValue, setInputValue] = useState(tagList.length >= 1 || '');
+
 	const onSubmit = data => {
-		message.success(
-			'The article has been successfully created! Maybe another one?'
-		);
-		const { tags, description, body, title } = data;
+		const { tags } = data;
 		const correctTags = [];
 		tags.forEach(item => {
 			if (item.tag) {
 				correctTags.push(item.tag);
 			}
 		});
-		const formatData = { title, description, body, tagList: correctTags };
-		dispatch(postNewArticle(formatData));
-		reset();
+		const formatData = {
+			...data,
+			tagList: correctTags,
+		};
+		if (path === '/new-article') {
+			message.success(
+				'The article has been successfully created! Maybe another one?'
+			);
+			dispatch(postNewArticle(formatData));
+			history.push(`/`);
+		} else {
+			message.success('The article has been successfully edited.');
+			dispatch(putUpdateArticle(formatData, slug));
+			history.push(`/articles/${slug}`);
+		}
 	};
 
-	if (!isLoggedIn) {
-		return <Redirect to='/sign-in' />;
-	}
+	useEffect(() => {
+		if (
+			path !== '/new-article' &&
+			currentUsername &&
+			currentUsername !== username
+		) {
+			dispatch(errorOn("You should not edit someone else' article"));
+		}
+	}, [username, currentUsername, path]);
+
+	useEffect(() => {
+		if (path !== '/new-article') {
+			setValue('title', title);
+			setValue('description', description);
+			setValue('body', body);
+			setValue('tags', defaultTagList.length ? defaultTagList : [{ tag: '' }]);
+		} else reset();
+	}, [path]);
+
+	useEffect(() => {
+		if (!isLoggedIn) {
+			history.push('/');
+		}
+	}, [isLoggedIn]);
 
 	return (
 		<div className={classes.signUp}>
-			<p className={classes.title}>Create new article</p>
+			{path === '/new-article' ? (
+				<p className={classes.title}>Create new article</p>
+			) : (
+				<p className={classes.title}>Edit article</p>
+			)}
 			<form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
 				<label htmlFor='title' className={classes.inputTitle}>
 					Title
@@ -134,8 +186,8 @@ function NewArticle() {
 							/>
 							<button
 								onClick={() => {
-									setInputValue(fields.length);
 									remove(index);
+									if (tagList.length) setInputValue(tagList.length);
 								}}
 								className={classes.deleteTagBtn}
 								type='button'
@@ -147,6 +199,7 @@ function NewArticle() {
 								<button
 									onClick={() => {
 										append();
+
 										setInputValue('');
 									}}
 									className={classes.addTagBtn}
@@ -162,7 +215,11 @@ function NewArticle() {
 						</p>
 					</div>
 				))}
-				<button className={classes.submitButton} type='submit'>
+				<button
+					className={classes.submitButton}
+					type='submit'
+					disabled={isFetching}
+				>
 					Send
 				</button>
 			</form>
@@ -170,4 +227,4 @@ function NewArticle() {
 	);
 }
 
-export default NewArticle;
+export default ArticleForm;

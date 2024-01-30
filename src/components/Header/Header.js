@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom/cjs/react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 import classes from './Header.module.scss';
 import userLogo from '../../img/user-logo.svg';
@@ -8,9 +9,12 @@ import userLogo from '../../img/user-logo.svg';
 import { fetchArticlesList, logOut } from '../../redux/actions';
 
 function Header() {
+	const history = useHistory();
+	const path = history.location.pathname;
 	const dispatch = useDispatch();
 	const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
 	const user = useSelector(state => state.userReducer.user);
+	const slug = useSelector(state => state.selectedArticle.item.slug);
 	const { username, image } = user;
 	const [logo, setLogo] = useState(image);
 	const [name, setName] = useState(username);
@@ -30,12 +34,14 @@ function Header() {
 				Realworld Blog
 			</Link>
 			<div className={classes.rightBlock}>
-				<Link
-					to='/new-article'
-					className={[classes.buttonCreateArticle, classes.button].join(' ')}
-				>
-					Create article
-				</Link>
+				{isLoggedIn && (
+					<Link
+						to='/new-article'
+						className={[classes.buttonCreateArticle, classes.button].join(' ')}
+					>
+						Create article
+					</Link>
+				)}
 				{!isLoggedIn && (
 					<Link
 						to='/sign-in'
@@ -77,6 +83,9 @@ function Header() {
 							localStorage.clear();
 							dispatch(logOut());
 							dispatch(fetchArticlesList());
+							if (path !== `/articles/${slug}`) {
+								history.push('/');
+							}
 						}}
 					>
 						Log Out
